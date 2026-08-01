@@ -61,7 +61,8 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
+    // ✅ Only ADMIN can create users. Roles are resolved from the DB inside UserService —
+    // this endpoint never accepts a raw User entity.
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponseDto> createUser(@RequestBody CreateUserRequestDto request) {
@@ -102,6 +103,31 @@ public class UserController {
         try {
             User user = userService.updateUserStatus(id, status);
             return ResponseEntity.ok(UserResponseDto.from(user));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ✅ Self-service: any authenticated user can change THEIR OWN password.
+    // No @PreAuthorize role check — but note the service resolves the target
+    // user from the token itself, not from any id in the request.
+    @PatchMapping("/change-password")
+    public ResponseEntity<Void> changeMyPassword(@RequestBody Map<String, String> request) {
+        try {
+            userService.changeOwnPassword(request.get("oldPassword"), request.get("newPassword"));
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ✅ Admin-only: reset ANY user's password without needing their old one.
+    @PatchMapping("/{id}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        try {
+            userService.resetPassword(id, request.get("newPassword"));
+            return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }

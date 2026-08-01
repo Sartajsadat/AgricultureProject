@@ -267,41 +267,52 @@ public class UserService {
         return saved;
     }
 
+    // ✅ Self-service: authenticated user changes THEIR OWN password.
+    // Resolves the target user from the SecurityContext — never from a
+    // client-supplied id — so nobody can change someone else's password
+    // through this endpoint.
     @Transactional
-    public void changePassword(Long userId, String oldPassword, String newPassword) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+    public void changeOwnPassword(String oldPassword, String newPassword) {
+        String email = getCurrentUserEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new IllegalArgumentException("Old password is incorrect");
         }
+        validateNewPassword(newPassword);
 
-        String actor = getCurrentUserEmail();
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.setUpdatedBy(actor);
-        user.setUpdatedAt(LocalDateTime.now());
-
-        userRepository.save(user);
-
-        // ✅ Never log old/new password values, even hashed — just the fact it happened.
-        auditService.logAction(AuditAction.PASSWORD_CHANGED, "User", userId, null, null,
-                "Password changed by " + actor);
+        applyNewPassword(user, newPassword);
+        auditService.logAction(AuditAction.PASSWORD_CHANGED, "User", user.getId(), null, null,
+                "Password changed by " + email);
     }
 
+    // ✅ Admin action: caller already knows the target id and doesn't need
+    // (or know) the old password. Guarded by @PreAuthorize in the controller.
     @Transactional
     public void resetPassword(Long userId, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        validateNewPassword(newPassword);
 
         String actor = getCurrentUserEmail();
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.setUpdatedBy(actor);
-        user.setUpdatedAt(LocalDateTime.now());
-
-        userRepository.save(user);
+        applyNewPassword(user, newPassword);
 
         auditService.logAction(AuditAction.PASSWORD_RESET, "User", userId, null, null,
                 "Password reset by " + actor);
+    }
+
+    private void validateNewPassword(String newPassword) {
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("New password must be at least 6 characters");
+        }
+    }
+
+    private void applyNewPassword(User user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedBy(getCurrentUserEmail());
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     // ✅ Single place that turns role names into managed Role entities.

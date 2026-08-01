@@ -1,6 +1,9 @@
 package AgricultureProject.user.service;
 
-import AgricultureProject.user.dto.CreateUserRequest;
+import AgricultureProject.audit.entity.AuditAction;
+import AgricultureProject.audit.service.AuditService;
+import AgricultureProject.user.dto.CreateUserRequestDto;
+import AgricultureProject.user.dto.UserResponseDto;
 import AgricultureProject.user.entity.Role;
 import AgricultureProject.user.entity.User;
 import AgricultureProject.user.repository.RoleRepository;
@@ -12,10 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -23,13 +30,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       AuditService auditService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.auditService = auditService;
     }
 
     private String getCurrentUserEmail() {
@@ -59,11 +69,9 @@ public class UserService {
         return userRepository.findByFirstNameContainingOrLastNameContaining(query, query);
     }
 
-    // ✅ Reached only via UserController, which is locked to ADMIN with @PreAuthorize.
-    // Takes a DTO, never a raw User entity — no default "USER" fallback: the admin
-    // must explicitly choose at least one role.
+    // ✅ Reached only via UserController, locked to ADMIN with @PreAuthorize.
     @Transactional
-    public User createUser(CreateUserRequest request) {
+    public User createUser(CreateUserRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists: " + request.getEmail());
         }
@@ -94,50 +102,81 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         user.setRoles(roles);
 
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        auditService.logCreate("User", saved.getId(), UserResponseDto.from(saved),
+                "User created by " + actor);
+
+        return saved;
     }
 
+    // ✅ Captures a full snapshot BEFORE any field is touched, tracks exactly which
+    // fields actually changed, and logs old vs. new after saving.
     @Transactional
     public User updateUser(Long id, User userDetails) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
 
-        if (userDetails.getFirstName() != null) {
+        UserResponseDto oldSnapshot = UserResponseDto.from(existingUser);
+        List<String> changedFields = new ArrayList<>();
+        String actor = getCurrentUserEmail();
+
+        if (userDetails.getFirstName() != null && !Objects.equals(userDetails.getFirstName(), existingUser.getFirstName())) {
             existingUser.setFirstName(userDetails.getFirstName());
+            changedFields.add("firstName");
         }
-        if (userDetails.getLastName() != null) {
+        if (userDetails.getLastName() != null && !Objects.equals(userDetails.getLastName(), existingUser.getLastName())) {
             existingUser.setLastName(userDetails.getLastName());
+            changedFields.add("lastName");
         }
         if (userDetails.getEmail() != null && !userDetails.getEmail().equals(existingUser.getEmail())) {
             if (userRepository.existsByEmail(userDetails.getEmail())) {
                 throw new IllegalArgumentException("Email already exists: " + userDetails.getEmail());
             }
             existingUser.setEmail(userDetails.getEmail());
+            changedFields.add("email");
         }
-        if (userDetails.getDirectorate() != null) {
+        if (userDetails.getDirectorate() != null && !Objects.equals(userDetails.getDirectorate(), existingUser.getDirectorate())) {
             existingUser.setDirectorate(userDetails.getDirectorate());
+            changedFields.add("directorate");
         }
-        if (userDetails.getDepartment() != null) {
+        if (userDetails.getDepartment() != null && !Objects.equals(userDetails.getDepartment(), existingUser.getDepartment())) {
             existingUser.setDepartment(userDetails.getDepartment());
+            changedFields.add("department");
         }
-        if (userDetails.getPosition() != null) {
+        if (userDetails.getPosition() != null && !Objects.equals(userDetails.getPosition(), existingUser.getPosition())) {
             existingUser.setPosition(userDetails.getPosition());
+            changedFields.add("position");
         }
-        if (userDetails.getPhoneNo() != null) {
+        if (userDetails.getPhoneNo() != null && !Objects.equals(userDetails.getPhoneNo(), existingUser.getPhoneNo())) {
             existingUser.setPhoneNo(userDetails.getPhoneNo());
+            changedFields.add("phoneNo");
         }
 
-        existingUser.setUpdatedBy(getCurrentUserEmail());
+        existingUser.setUpdatedBy(actor);
         existingUser.setUpdatedAt(LocalDateTime.now());
 
-        return userRepository.save(existingUser);
+        User saved = userRepository.save(existingUser);
+
+        if (!changedFields.isEmpty()) {
+            auditService.logUpdate("User", id, oldSnapshot, UserResponseDto.from(saved),
+                    "Updated by " + actor + " — changed: " + String.join(", ", changedFields));
+        }
+
+        return saved;
     }
 
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+
+        UserResponseDto snapshot = UserResponseDto.from(user);
+        String actor = getCurrentUserEmail();
+
         userRepository.delete(user);
+
+        auditService.logDelete("User", id, snapshot, "User deleted by " + actor);
     }
 
     @Transactional
@@ -145,11 +184,20 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
 
+        String oldStatus = user.getStatus();
+        String actor = getCurrentUserEmail();
+
         user.setStatus(status);
-        user.setUpdatedBy(getCurrentUserEmail());
+        user.setUpdatedBy(actor);
         user.setUpdatedAt(LocalDateTime.now());
 
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        auditService.logAction(AuditAction.STATUS_CHANGE, "User", id,
+                Map.of("status", oldStatus), Map.of("status", status),
+                "Status changed from " + oldStatus + " to " + status + " by " + actor);
+
+        return saved;
     }
 
     @Transactional
@@ -157,14 +205,22 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
 
+        Set<String> oldRoles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         Set<Role> roles = resolveRoles(new HashSet<>(roleNames));
+        String actor = getCurrentUserEmail();
 
         user.getRoles().clear();
         user.getRoles().addAll(roles);
-        user.setUpdatedBy(getCurrentUserEmail());
+        user.setUpdatedBy(actor);
         user.setUpdatedAt(LocalDateTime.now());
 
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        Set<String> newRoles = roles.stream().map(Role::getName).collect(Collectors.toSet());
+        auditService.logAction(AuditAction.ROLE_ASSIGNED, "User", userId, oldRoles, newRoles,
+                "Roles reassigned by " + actor);
+
+        return saved;
     }
 
     @Transactional
@@ -172,11 +228,21 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
 
-        user.getRoles().add(findRoleByName(roleName));
-        user.setUpdatedBy(getCurrentUserEmail());
+        Set<String> oldRoles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        Role role = findRoleByName(roleName);
+        String actor = getCurrentUserEmail();
+
+        user.getRoles().add(role);
+        user.setUpdatedBy(actor);
         user.setUpdatedAt(LocalDateTime.now());
 
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        Set<String> newRoles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        auditService.logAction(AuditAction.ROLE_ASSIGNED, "User", userId, oldRoles, newRoles,
+                "Role '" + role.getName() + "' added by " + actor);
+
+        return saved;
     }
 
     @Transactional
@@ -184,11 +250,21 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
 
-        user.getRoles().remove(findRoleByName(roleName));
-        user.setUpdatedBy(getCurrentUserEmail());
+        Set<String> oldRoles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        Role role = findRoleByName(roleName);
+        String actor = getCurrentUserEmail();
+
+        user.getRoles().remove(role);
+        user.setUpdatedBy(actor);
         user.setUpdatedAt(LocalDateTime.now());
 
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        Set<String> newRoles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        auditService.logAction(AuditAction.ROLE_REMOVED, "User", userId, oldRoles, newRoles,
+                "Role '" + role.getName() + "' removed by " + actor);
+
+        return saved;
     }
 
     @Transactional
@@ -200,11 +276,16 @@ public class UserService {
             throw new IllegalArgumentException("Old password is incorrect");
         }
 
+        String actor = getCurrentUserEmail();
         user.setPassword(passwordEncoder.encode(newPassword));
-        user.setUpdatedBy(getCurrentUserEmail());
+        user.setUpdatedBy(actor);
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
+
+        // ✅ Never log old/new password values, even hashed — just the fact it happened.
+        auditService.logAction(AuditAction.PASSWORD_CHANGED, "User", userId, null, null,
+                "Password changed by " + actor);
     }
 
     @Transactional
@@ -212,15 +293,18 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
 
+        String actor = getCurrentUserEmail();
         user.setPassword(passwordEncoder.encode(newPassword));
-        user.setUpdatedBy(getCurrentUserEmail());
+        user.setUpdatedBy(actor);
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
+
+        auditService.logAction(AuditAction.PASSWORD_RESET, "User", userId, null, null,
+                "Password reset by " + actor);
     }
 
     // ✅ Single place that turns role names into managed Role entities.
-    // Shared by createUser and assignRoles to avoid duplicated lookup logic.
     private Set<Role> resolveRoles(Set<String> roleNames) {
         Set<Role> roles = new HashSet<>();
         for (String roleName : roleNames) {

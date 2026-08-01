@@ -1,6 +1,8 @@
 package AgricultureProject.user.controller;
 
-import AgricultureProject.user.dto.CreateUserRequest;
+import AgricultureProject.user.dto.CreateUserRequestDto;
+import AgricultureProject.user.dto.UserListDto;
+import AgricultureProject.user.dto.UserResponseDto;
 import AgricultureProject.user.entity.User;
 import AgricultureProject.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -25,41 +28,46 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserListDto>> getAllUsers() {
+        List<UserListDto> users = userService.getAllUsers().stream()
+                .map(UserListDto::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
+                .map(UserResponseDto::from)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserResponseDto> getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email)
+                .map(UserResponseDto::from)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser(@RequestParam String email) {
+    public ResponseEntity<UserResponseDto> getCurrentUser(@RequestParam String email) {
         return userService.getUserByEmail(email)
+                .map(UserResponseDto::from)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    
 
-    // ✅ Only ADMIN can create users. Roles are resolved from the DB inside UserService —
-    // this endpoint never accepts a raw User entity.
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody CreateUserRequestDto request) {
         try {
             User created = userService.createUser(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+            return ResponseEntity.status(HttpStatus.CREATED).body(UserResponseDto.from(created));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -67,10 +75,10 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id, @RequestBody User user) {
         try {
             User updated = userService.updateUser(id, user);
-            return ResponseEntity.ok(updated);
+            return ResponseEntity.ok(UserResponseDto.from(updated));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
@@ -89,11 +97,11 @@ public class UserController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUserStatus(@PathVariable Long id,
-                                                 @RequestParam String status) {
+    public ResponseEntity<UserResponseDto> updateUserStatus(@PathVariable Long id,
+                                                            @RequestParam String status) {
         try {
             User user = userService.updateUserStatus(id, status);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(UserResponseDto.from(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -101,25 +109,31 @@ public class UserController {
 
     @GetMapping("/status/{status}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<User>> getUsersByStatus(@PathVariable String status) {
-        return ResponseEntity.ok(userService.getUsersByStatus(status));
+    public ResponseEntity<List<UserListDto>> getUsersByStatus(@PathVariable String status) {
+        List<UserListDto> users = userService.getUsersByStatus(status).stream()
+                .map(UserListDto::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam String query) {
-        return ResponseEntity.ok(userService.searchUsers(query));
+    public ResponseEntity<List<UserListDto>> searchUsers(@RequestParam String query) {
+        List<UserListDto> users = userService.searchUsers(query).stream()
+                .map(UserListDto::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(users);
     }
 
     // ✅ Admin can (re)assign the full role set
     @PostMapping("/{userId}/roles")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> assignRoles(@PathVariable Long userId,
-                                            @RequestBody Map<String, List<String>> request) {
+    public ResponseEntity<UserResponseDto> assignRoles(@PathVariable Long userId,
+                                                       @RequestBody Map<String, List<String>> request) {
         try {
             List<String> roleNames = request.get("roles");
             User user = userService.assignRoles(userId, roleNames);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(UserResponseDto.from(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -127,12 +141,12 @@ public class UserController {
 
     @PostMapping("/{userId}/roles/add")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> addRole(@PathVariable Long userId,
-                                        @RequestBody Map<String, String> request) {
+    public ResponseEntity<UserResponseDto> addRole(@PathVariable Long userId,
+                                                   @RequestBody Map<String, String> request) {
         try {
             String roleName = request.get("roleName");
             User user = userService.addRole(userId, roleName);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(UserResponseDto.from(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -140,11 +154,11 @@ public class UserController {
 
     @DeleteMapping("/{userId}/roles/remove")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> removeRole(@PathVariable Long userId,
-                                           @RequestParam String roleName) {
+    public ResponseEntity<UserResponseDto> removeRole(@PathVariable Long userId,
+                                                      @RequestParam String roleName) {
         try {
             User user = userService.removeRole(userId, roleName);
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(UserResponseDto.from(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }

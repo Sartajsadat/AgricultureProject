@@ -60,7 +60,7 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")

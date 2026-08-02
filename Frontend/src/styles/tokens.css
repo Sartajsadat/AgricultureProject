@@ -1,0 +1,112 @@
+/* ============================================================
+   DESIGN TOKENS — the single source of truth for the whole UI.
+   Every component reads from these variables instead of hard-
+   coding colors/spacing/radius. Add a new component and it
+   automatically matches, because it has nothing else to draw from.
+   ============================================================ */
+
+:root {
+  /* ---- Color: light mode ---- */
+  --color-bg: #f6f7f3;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-border: #e2e5dd;
+  --color-border-strong: #cbd0c2;
+
+  --color-text: #202821;
+  --color-text-muted: #5c6a5c;
+  --color-text-faint: #8b9788;
+
+  --color-primary: #3f6b4b;
+  --color-primary-hover: #345a3f;
+  --color-primary-soft: #e7efe6;
+
+  --color-accent: #b8922e; /* wheat gold — used sparingly: active states, highlights */
+  --color-accent-soft: #f5ecd4;
+
+  --color-danger: #b3452c;
+  --color-danger-soft: #f6e6e1;
+  --color-success: #3f6b4b;
+  --color-success-soft: #e7efe6;
+
+  --color-overlay: rgba(20, 24, 20, 0.45);
+
+  /* ---- Spacing scale ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ---- Radius ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 1px 2px rgba(20, 24, 20, 0.06);
+  --shadow-md: 0 4px 16px rgba(20, 24, 20, 0.08);
+  --shadow-lg: 0 12px 32px rgba(20, 24, 20, 0.14);
+
+  /* ---- Type scale ---- */
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-body-rtl: 'Vazirmatn', 'Inter', system-ui, sans-serif;
+
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ---- Layout ---- */
+  --navbar-height: 60px;
+  --sidebar-width: 248px;
+  --sidebar-width-collapsed: 72px;
+
+  /* ---- Motion ---- */
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+}
+
+/* ---- Color: dark mode ---- */
+[data-theme='dark'] {
+  --color-bg: #141815;
+  --color-surface: #1c211d;
+  --color-surface-raised: #232921;
+  --color-border: #2c332a;
+  --color-border-strong: #3a4236;
+
+  --color-text: #e9ede6;
+  --color-text-muted: #a3ae9d;
+  --color-text-faint: #798376;
+
+  --color-primary: #6fa97d;
+  --color-primary-hover: #7fb98d;
+  --color-primary-soft: #223226;
+
+  --color-accent: #d9b84a;
+  --color-accent-soft: #332c17;
+
+  --color-danger: #d97a5f;
+  --color-danger-soft: #3a241d;
+  --color-success: #6fa97d;
+  --color-success-soft: #223226;
+
+  --color-overlay: rgba(0, 0, 0, 0.6);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+}

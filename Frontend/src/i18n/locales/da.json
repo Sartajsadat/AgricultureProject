@@ -1,0 +1,72 @@
+{
+  "app": { "title": "ریاست زراعت" },
+  "nav": {
+    "dashboard": "پیشخوان",
+    "userManagement": "مدیریت کاربران",
+    "roles": "نقش‌ها"
+  },
+  "navbar": {
+    "language": "زبان",
+    "toggleDark": "حالت تاریک",
+    "profile": "پروفایل",
+    "changePassword": "تغییر رمز عبور",
+    "logout": "خروج"
+  },
+  "login": {
+    "title": "ورود",
+    "subtitle": "برای دسترسی به پنل مدیریت، معلومات خود را وارد کنید",
+    "email": "ایمیل",
+    "password": "رمز عبور",
+    "submit": "ورود",
+    "error": "ایمیل یا رمز عبور نادرست است"
+  },
+  "users": {
+    "title": "مدیریت کاربران",
+    "addNew": "افزودن کاربر جدید",
+    "search": "جستجو بر اساس نام یا ایمیل...",
+    "columns": {
+      "name": "نام",
+      "email": "ایمیل",
+      "department": "دیپارتمنت",
+      "roles": "نقش‌ها",
+      "status": "وضعیت",
+      "actions": "اقدامات"
+    },
+    "empty": "کاربری یافت نشد."
+  },
+  "roles": {
+    "title": "نقش‌ها",
+    "addNew": "افزودن نقش جدید",
+    "name": "نام نقش",
+    "empty": "هنوز نقشی وجود ندارد."
+  },
+  "profile": {
+    "title": "پروفایل من",
+    "firstName": "نام",
+    "lastName": "تخلص",
+    "email": "ایمیل",
+    "department": "دیپارتمنت",
+    "position": "بست",
+    "phoneNo": "شماره تلفن",
+    "status": "وضعیت",
+    "roles": "نقش‌ها"
+  },
+  "changePassword": {
+    "title": "تغییر رمز عبور",
+    "oldPassword": "رمز عبور فعلی",
+    "newPassword": "رمز عبور جدید",
+    "confirmPassword": "تکرار رمز عبور جدید",
+    "submit": "به‌روزرسانی رمز عبور",
+    "success": "رمز عبور با موفقیت به‌روزرسانی شد",
+    "mismatch": "رمزهای عبور مطابقت ندارند"
+  },
+  "common": {
+    "cancel": "لغو",
+    "save": "ذخیره",
+    "create": "ایجاد",
+    "loading": "در حال بارگذاری...",
+    "close": "بستن",
+    "active": "فعال",
+    "inactive": "غیرفعال"
+  }
+}

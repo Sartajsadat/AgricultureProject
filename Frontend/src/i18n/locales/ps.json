@@ -1,0 +1,72 @@
+{
+  "app": { "title": "د کرنې ریاست" },
+  "nav": {
+    "dashboard": "ډشبورډ",
+    "userManagement": "د کاروونکو مدیریت",
+    "roles": "رولونه"
+  },
+  "navbar": {
+    "language": "ژبه",
+    "toggleDark": "تیاره حالت",
+    "profile": "پروفایل",
+    "changePassword": "پاسورډ بدلول",
+    "logout": "وتل"
+  },
+  "login": {
+    "title": "ننوتل",
+    "subtitle": "د اډمین پینل ته د لاسرسي لپاره خپل معلومات ولیکئ",
+    "email": "بریښنالیک",
+    "password": "پاسورډ",
+    "submit": "ننوتل",
+    "error": "بریښنالیک یا پاسورډ سم نه دی"
+  },
+  "users": {
+    "title": "د کاروونکو مدیریت",
+    "addNew": "نوی کاروونکی زیات کړئ",
+    "search": "د نوم یا بریښنالیک له مخې لټون...",
+    "columns": {
+      "name": "نوم",
+      "email": "بریښنالیک",
+      "department": "څانګه",
+      "roles": "رولونه",
+      "status": "حالت",
+      "actions": "کړنې"
+    },
+    "empty": "هیڅ کاروونکی ونه موندل شو."
+  },
+  "roles": {
+    "title": "رولونه",
+    "addNew": "نوی رول زیات کړئ",
+    "name": "د رول نوم",
+    "empty": "لا تر اوسه هیڅ رول نشته."
+  },
+  "profile": {
+    "title": "زما پروفایل",
+    "firstName": "لومړی نوم",
+    "lastName": "تخلص",
+    "email": "بریښنالیک",
+    "department": "څانګه",
+    "position": "بست",
+    "phoneNo": "تلیفون شمېره",
+    "status": "حالت",
+    "roles": "رولونه"
+  },
+  "changePassword": {
+    "title": "پاسورډ بدلول",
+    "oldPassword": "اوسنی پاسورډ",
+    "newPassword": "نوی پاسورډ",
+    "confirmPassword": "نوی پاسورډ تایید کړئ",
+    "submit": "پاسورډ نوی کړئ",
+    "success": "پاسورډ په بریالیتوب سره نوی شو",
+    "mismatch": "پاسورډونه سره سمون نه خوري"
+  },
+  "common": {
+    "cancel": "لغوه کول",
+    "save": "خوندي کول",
+    "create": "جوړول",
+    "loading": "بارېږي...",
+    "close": "بندول",
+    "active": "فعال",
+    "inactive": "غیرفعال"
+  }
+}

@@ -1,0 +1,38 @@
+.dropdown {
+  position: relative;
+}
+
+.dropdown__menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  min-width: 200px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-2);
+  z-index: 200;
+  animation: dropdown-pop 140ms ease;
+}
+
+/* ✅ logical properties: "end" sits on the correct side automatically
+   whether the page is ltr or rtl — no separate rtl override needed */
+.dropdown__menu--end {
+  inset-inline-end: 0;
+}
+.dropdown__menu--start {
+  inset-inline-start: 0;
+}
+
+@keyframes dropdown-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown__menu {
+    animation: none;
+  }
+}

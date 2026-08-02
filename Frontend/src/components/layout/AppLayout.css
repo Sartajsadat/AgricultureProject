@@ -1,0 +1,24 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-layout__body {
+  flex: 1;
+  display: flex; /* ✅ row direction follows document `dir` automatically —
+                      sidebar ends up on the correct side with no rtl override */
+  min-height: 0;
+}
+
+.app-layout__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+@media (max-width: 900px) {
+  .app-layout__content {
+    padding: var(--space-4);
+  }
+}

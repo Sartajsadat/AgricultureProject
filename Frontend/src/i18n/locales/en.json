@@ -1,0 +1,72 @@
+{
+  "app": { "title": "Agriculture Directorate" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "userManagement": "User Management",
+    "roles": "Roles"
+  },
+  "navbar": {
+    "language": "Language",
+    "toggleDark": "Toggle dark mode",
+    "profile": "Profile",
+    "changePassword": "Change Password",
+    "logout": "Logout"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Enter your credentials to access the admin panel",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "error": "Invalid email or password"
+  },
+  "users": {
+    "title": "User Management",
+    "addNew": "Add New User",
+    "search": "Search by name or email...",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "department": "Department",
+      "roles": "Roles",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": "No users found."
+  },
+  "roles": {
+    "title": "Roles",
+    "addNew": "Add New Role",
+    "name": "Role name",
+    "empty": "No roles yet."
+  },
+  "profile": {
+    "title": "My Profile",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "department": "Department",
+    "position": "Position",
+    "phoneNo": "Phone",
+    "status": "Status",
+    "roles": "Roles"
+  },
+  "changePassword": {
+    "title": "Change Password",
+    "oldPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "submit": "Update Password",
+    "success": "Password updated successfully",
+    "mismatch": "Passwords do not match"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "loading": "Loading...",
+    "close": "Close",
+    "active": "Active",
+    "inactive": "Inactive"
+  }
+}

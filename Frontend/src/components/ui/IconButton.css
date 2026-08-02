@@ -21,3 +21,8 @@
   color: var(--color-primary);
   border-color: var(--color-primary);
 }
+
+.icon-btn--danger:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}

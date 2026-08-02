@@ -4,9 +4,11 @@ import Modal from '../ui/Modal';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { roleApi } from '../../api/roleApi';
+import { useToast } from '../../context/ToastContext';
 
 export default function AddRoleModal({ open, onClose, onCreated }) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,6 +26,7 @@ export default function AddRoleModal({ open, onClose, onCreated }) {
     try {
       const created = await roleApi.create(name);
       onCreated?.(created);
+      toast.success(t('roles.createSuccess'));
       handleClose();
     } catch (err) {
       setError(err.response?.status === 400 ? 'Role already exists' : 'Could not create role');

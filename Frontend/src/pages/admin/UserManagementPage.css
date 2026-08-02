@@ -30,6 +30,12 @@
   padding: 0;
 }
 
+.user-management__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
 @media (max-width: 640px) {
   .user-management__header {
     flex-direction: column;

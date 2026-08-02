@@ -10,6 +10,11 @@ export const userApi = {
 
   create: (payload) => axiosClient.post('/users', payload).then((res) => res.data),
 
+  update: (id, payload) => axiosClient.put(`/users/${id}`, payload).then((res) => res.data),
+
+  assignRoles: (id, roles) =>
+    axiosClient.post(`/users/${id}/roles`, { roles }).then((res) => res.data),
+
   updateStatus: (id, status) =>
     axiosClient.patch(`/users/${id}/status`, null, { params: { status } }).then((res) => res.data),
 

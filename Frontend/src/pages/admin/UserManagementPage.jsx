@@ -1,11 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Pencil, KeyRound, Trash2 } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import IconButton from '../../components/ui/IconButton';
 import SearchInput from '../../components/ui/SearchInput';
 import DataTable from '../../components/ui/DataTable';
 import Badge from '../../components/ui/Badge';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import AddUserModal from '../../components/modals/AddUserModal';
+import EditUserModal from '../../components/modals/EditUserModal';
+import ResetPasswordModal from '../../components/modals/ResetPasswordModal';
 import { userApi } from '../../api/userApi';
 import './UserManagementPage.css';
 
@@ -14,7 +18,12 @@ export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
+
+  const [addOpen, setAddOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [resettingUser, setResettingUser] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   function loadUsers() {
     setLoading(true);
@@ -42,6 +51,18 @@ export default function UserManagementPage() {
     const nextStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
     const updated = await userApi.updateStatus(user.id, nextStatus);
     setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, status: updated.status } : u)));
+  }
+
+  async function handleDelete() {
+    if (!deletingUser) return;
+    setDeleteLoading(true);
+    try {
+      await userApi.delete(deletingUser.id);
+      setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id));
+      setDeletingUser(null);
+    } finally {
+      setDeleteLoading(false);
+    }
   }
 
   const columns = [
@@ -87,13 +108,24 @@ export default function UserManagementPage() {
         </button>
       ),
     },
+    {
+      key: 'actions',
+      label: t('users.columns.actions'),
+      render: (row) => (
+        <div className="user-management__actions">
+          <IconButton icon={Pencil} label={t('common.edit')} onClick={() => setEditingUser(row)} />
+          <IconButton icon={KeyRound} label={t('users.resetPasswordTitle')} onClick={() => setResettingUser(row)} />
+          {/*<IconButton icon={Trash2} label={t('common.delete')} tone="danger" onClick={() => setDeletingUser(row)} />*/}
+        </div>
+      ),
+    },
   ];
 
   return (
     <div className="user-management">
       <div className="user-management__header">
         <h1 className="user-management__title">{t('users.title')}</h1>
-        <Button icon={UserPlus} onClick={() => setModalOpen(true)}>
+        <Button icon={UserPlus} onClick={() => setAddOpen(true)}>
           {t('users.addNew')}
         </Button>
       </div>
@@ -111,10 +143,30 @@ export default function UserManagementPage() {
         />
       )}
 
-      <AddUserModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onCreated={loadUsers}
+      <AddUserModal open={addOpen} onClose={() => setAddOpen(false)} onCreated={loadUsers} />
+
+      <EditUserModal
+        open={!!editingUser}
+        user={editingUser}
+        onClose={() => setEditingUser(null)}
+        onSaved={loadUsers}
+      />
+
+      <ResetPasswordModal
+        open={!!resettingUser}
+        user={resettingUser}
+        onClose={() => setResettingUser(null)}
+      />
+
+      <ConfirmDialog
+        open={!!deletingUser}
+        onClose={() => setDeletingUser(null)}
+        onConfirm={handleDelete}
+        loading={deleteLoading}
+        title={t('users.deleteTitle')}
+        message={t('users.deleteMessage', {
+          name: deletingUser ? `${deletingUser.firstName} ${deletingUser.lastName}` : '',
+        })}
       />
     </div>
   );

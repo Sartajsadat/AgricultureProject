@@ -7,25 +7,41 @@ import { userApi } from '../../api/userApi';
 import { roleApi } from '../../api/roleApi';
 import { useToast } from '../../context/ToastContext';
 
-const initialForm = {
+const emptyForm = {
   firstName: '',
   lastName: '',
   email: '',
-  password: '',
   directorate: '',
   department: '',
   position: '',
   phoneNo: '',
 };
 
-export default function AddUserModal({ open, onClose, onCreated }) {
+export default function EditUserModal({ open, onClose, user, onSaved }) {
   const { t } = useTranslation();
   const toast = useToast();
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(emptyForm);
   const [availableRoles, setAvailableRoles] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Re-fill the form whenever a different user is opened for editing.
+  useEffect(() => {
+    if (open && user) {
+      setForm({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        directorate: user.directorate || '',
+        department: user.department || '',
+        position: user.position || '',
+        phoneNo: user.phoneNo || '',
+      });
+      setSelectedRoles((user.roles || []).map((r) => r.name));
+      setError('');
+    }
+  }, [open, user]);
 
   useEffect(() => {
     if (open) {
@@ -43,13 +59,6 @@ export default function AddUserModal({ open, onClose, onCreated }) {
     );
   }
 
-  function handleClose() {
-    setForm(initialForm);
-    setSelectedRoles([]);
-    setError('');
-    onClose();
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
@@ -61,26 +70,30 @@ export default function AddUserModal({ open, onClose, onCreated }) {
 
     setLoading(true);
     try {
-      const created = await userApi.create({ ...form, roles: selectedRoles });
-      onCreated?.(created);
-      toast.success(t('users.createSuccess'));
-      handleClose();
+      // Two backend calls: profile fields via PUT, roles via the dedicated
+      // role-reassignment endpoint — that's how the API is shaped.
+      await userApi.update(user.id, form);
+      await userApi.assignRoles(user.id, selectedRoles);
+      onSaved?.();
+      toast.success(t('users.updateSuccess'));
+      onClose();
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not create user');
+      setError(err.response?.data?.message || 'Could not save changes');
     } finally {
       setLoading(false);
     }
   }
 
+  if (!user) return null;
+
   return (
-    <Modal open={open} onClose={handleClose} title={t('users.addNew')}>
+    <Modal open={open} onClose={onClose} title={t('users.edit')}>
       <form className="modal-form" onSubmit={handleSubmit}>
         <div className="modal-form__grid">
           <Input label={t('profile.firstName')} value={form.firstName} onChange={(e) => update('firstName', e.target.value)} required />
           <Input label={t('profile.lastName')} value={form.lastName} onChange={(e) => update('lastName', e.target.value)} required />
         </div>
         <Input type="email" label={t('profile.email')} value={form.email} onChange={(e) => update('email', e.target.value)} required />
-        <Input type="password" label="Password" value={form.password} onChange={(e) => update('password', e.target.value)} minLength={6} required />
         <div className="modal-form__grid">
           <Input label="Directorate" value={form.directorate} onChange={(e) => update('directorate', e.target.value)} />
           <Input label={t('profile.department')} value={form.department} onChange={(e) => update('department', e.target.value)} />
@@ -109,11 +122,11 @@ export default function AddUserModal({ open, onClose, onCreated }) {
         {error && <p className="modal-form__error">{error}</p>}
 
         <div className="modal-form__actions">
-          <Button type="button" variant="ghost" onClick={handleClose}>
+          <Button type="button" variant="ghost" onClick={onClose}>
             {t('common.cancel')}
           </Button>
           <Button type="submit" loading={loading}>
-            {t('common.create')}
+            {t('common.save')}
           </Button>
         </div>
       </form>

@@ -1,5 +1,9 @@
 {
   "app": { "title": "Agriculture Directorate" },
+  "auth": {
+    "loginSuccess": "Welcome back, {{name}}!",
+    "logoutSuccess": "Logged out successfully"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "userManagement": "User Management",
@@ -23,6 +27,7 @@
   "users": {
     "title": "User Management",
     "addNew": "Add New User",
+    "edit": "Edit User",
     "search": "Search by name or email...",
     "columns": {
       "name": "Name",
@@ -32,13 +37,19 @@
       "status": "Status",
       "actions": "Actions"
     },
-    "empty": "No users found."
+    "empty": "No users found.",
+    "createSuccess": "User created successfully",
+    "updateSuccess": "User updated successfully",
+    "deleteTitle": "Delete user?",
+    "deleteMessage": "This will permanently delete {{name}}. This cannot be undone.",
+    "resetPasswordTitle": "Reset Password"
   },
   "roles": {
     "title": "Roles",
     "addNew": "Add New Role",
     "name": "Role name",
-    "empty": "No roles yet."
+    "empty": "No roles yet.",
+    "createSuccess": "Role created successfully"
   },
   "profile": {
     "title": "My Profile",
@@ -67,6 +78,9 @@
     "loading": "Loading...",
     "close": "Close",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm"
   }
 }

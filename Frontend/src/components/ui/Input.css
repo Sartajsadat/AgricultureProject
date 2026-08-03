@@ -16,7 +16,7 @@
   align-items: center;
   gap: var(--space-2);
   background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid var(--color-border-input);
   border-radius: var(--radius-md);
   padding-inline: var(--space-3);
   transition: border-color var(--transition-fast);
@@ -42,6 +42,13 @@
   padding-block: 10px;
   outline: none;
   min-width: 0;
+}
+
+/* ✅ Beats the global :focus-visible outline rule in base.css on specificity
+   (0,2,0 vs 0,1,0), so focusing this input never draws a second ring around
+   itself — the only focus feedback is the wrapper's border turning green. */
+.field__input:focus-visible {
+  outline: none;
 }
 
 .field__error {

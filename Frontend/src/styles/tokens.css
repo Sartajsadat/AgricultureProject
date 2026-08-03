@@ -12,6 +12,7 @@
   --color-surface-raised: #ffffff;
   --color-border: #e2e5dd;
   --color-border-strong: #cbd0c2;
+  --color-border-input: #adb6a0; /* ✅ visibly readable as a border on its own, not just a hairline */
 
   --color-text: #202821;
   --color-text-muted: #5c6a5c;
@@ -87,6 +88,7 @@
   --color-surface-raised: #232921;
   --color-border: #2c332a;
   --color-border-strong: #3a4236;
+  --color-border-input: #4c5745;
 
   --color-text: #e9ede6;
   --color-text-muted: #a3ae9d;

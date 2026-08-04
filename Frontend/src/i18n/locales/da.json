@@ -7,7 +7,8 @@
   "nav": {
     "dashboard": "پیشخوان",
     "userManagement": "مدیریت کاربران",
-    "roles": "نقش‌ها"
+    "roles": "نقش‌ها",
+    "auditLogs": "لاگ‌های حسابرسی"
   },
   "navbar": {
     "language": "زبان",
@@ -50,6 +51,45 @@
     "name": "نام نقش",
     "empty": "هنوز نقشی وجود ندارد.",
     "createSuccess": "نقش با موفقیت ایجاد شد"
+  },
+  "audit": {
+    "title": "لاگ‌های حسابرسی",
+    "search": "جستجو در توضیحات، کاربر یا موجودیت...",
+    "filters": "فیلترها",
+    "applyFilters": "اعمال",
+    "clearFilters": "پاک کردن",
+    "action": "عملیات",
+    "allActions": "همه عملیات‌ها",
+    "performedBy": "انجام‌دهنده",
+    "empty": "هیچ لاگی یافت نشد.",
+    "viewDetails": "مشاهده جزئیات",
+    "columns": {
+      "action": "عملیات",
+      "entity": "موجودیت",
+      "performedBy": "انجام‌دهنده",
+      "description": "توضیحات",
+      "date": "تاریخ"
+    },
+    "details": {
+      "title": "جزئیات لاگ حسابرسی",
+      "oldValue": "قبل",
+      "newValue": "بعد",
+      "ip": "آدرس آی‌پی",
+      "userAgent": "دستگاه / مرورگر"
+    },
+    "actions": {
+      "CREATE": "ایجاد شد",
+      "UPDATE": "به‌روزرسانی شد",
+      "DELETE": "حذف شد",
+      "STATUS_CHANGE": "تغییر وضعیت",
+      "ROLE_ASSIGNED": "نقش تخصیص یافت",
+      "ROLE_REMOVED": "نقش حذف شد",
+      "PASSWORD_CHANGED": "رمز عبور تغییر کرد",
+      "PASSWORD_RESET": "بازنشانی رمز عبور",
+      "LOGIN_SUCCESS": "ورود موفق",
+      "LOGIN_FAILED": "ورود ناموفق",
+      "LOGOUT": "خروج"
+    }
   },
   "profile": {
     "title": "پروفایل من",

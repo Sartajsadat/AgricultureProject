@@ -7,7 +7,8 @@
   "nav": {
     "dashboard": "ډشبورډ",
     "userManagement": "د کاروونکو مدیریت",
-    "roles": "رولونه"
+    "roles": "رولونه",
+    "auditLogs": "د پلټنې لاګونه"
   },
   "navbar": {
     "language": "ژبه",
@@ -50,6 +51,45 @@
     "name": "د رول نوم",
     "empty": "لا تر اوسه هیڅ رول نشته.",
     "createSuccess": "رول په بریالیتوب سره جوړ شو"
+  },
+  "audit": {
+    "title": "د پلټنې لاګونه",
+    "search": "په تشریحاتو، کاروونکي یا اکاونټ کې لټون...",
+    "filters": "فلټرونه",
+    "applyFilters": "تطبیق",
+    "clearFilters": "پاکول",
+    "action": "کړنه",
+    "allActions": "ټولې کړنې",
+    "performedBy": "ترسره کوونکی",
+    "empty": "هیڅ لاګ ونه موندل شو.",
+    "viewDetails": "جزئیات وګورئ",
+    "columns": {
+      "action": "کړنه",
+      "entity": "اکاونټ",
+      "performedBy": "ترسره کوونکی",
+      "description": "تشریحات",
+      "date": "نیټه"
+    },
+    "details": {
+      "title": "د پلټنې لاګ جزئیات",
+      "oldValue": "مخکې",
+      "newValue": "وروسته",
+      "ip": "د آی‌پي پته",
+      "userAgent": "وسیله / براوزر"
+    },
+    "actions": {
+      "CREATE": "جوړ شو",
+      "UPDATE": "نوی شو",
+      "DELETE": "ړنګ شو",
+      "STATUS_CHANGE": "د حالت بدلون",
+      "ROLE_ASSIGNED": "رول ورکړل شو",
+      "ROLE_REMOVED": "رول لرې شو",
+      "PASSWORD_CHANGED": "پاسورډ بدل شو",
+      "PASSWORD_RESET": "پاسورډ بیا تنظیم شو",
+      "LOGIN_SUCCESS": "بریالی ننوتل",
+      "LOGIN_FAILED": "ناکام ننوتل",
+      "LOGOUT": "وتل"
+    }
   },
   "profile": {
     "title": "زما پروفایل",

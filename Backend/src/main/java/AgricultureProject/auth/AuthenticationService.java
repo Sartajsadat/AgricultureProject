@@ -42,9 +42,14 @@ public class AuthenticationService {
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
         } catch (AuthenticationException ex) {
-            // ✅ Failed attempts are audited too — bad password, unknown email, locked account, etc.
-            auditService.logAction(AuditAction.LOGIN_FAILED, "User", null, null, null,
-                    "Failed login attempt for " + request.getEmail() + " — " + ex.getMessage());
+            // ✅ At this point in the request there is no authenticated user yet —
+            // SecurityContext holds Spring Security's "anonymousUser" principal, not
+            // a real one. We already know the email that was attempted, so we pass
+            // it explicitly rather than letting AuditService fall back to that
+            // anonymous placeholder.
+            auditService.logAction(AuditAction.LOGIN_FAILED, "User", null, request.getEmail(), null, null,
+                    "Failed login attempt for " + request.getEmail() + " — " + ex.getMessage(),
+                    request.getEmail());
             throw ex;
         }
 
@@ -52,9 +57,12 @@ public class AuthenticationService {
         User user = userRepository.findByEmailWithRoles(request.getEmail())
                 .orElseThrow(() -> new IllegalStateException("User not found with email: " + request.getEmail()));
 
+        String fullName = user.getFirstName() + " " + user.getLastName();
+
         if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
-            auditService.logAction(AuditAction.LOGIN_FAILED, "User", user.getId(), null, null,
-                    "Login blocked — account status is " + user.getStatus());
+            auditService.logAction(AuditAction.LOGIN_FAILED, "User", user.getId(), fullName, null, null,
+                    "Login blocked — account status is " + user.getStatus(),
+                    user.getEmail());
             throw new IllegalStateException("Account is " + user.getStatus() + ". Please contact administrator.");
         }
 
@@ -64,8 +72,11 @@ public class AuthenticationService {
 
         String token = jwtService.generateToken(user);
 
-        auditService.logAction(AuditAction.LOGIN_SUCCESS, "User", user.getId(), null, null,
-                "Login successful");
+        // ✅ Same reasoning as above — pass the email we just verified explicitly,
+        // rather than reading it back out of a SecurityContext that was never
+        // actually populated by this request.
+        auditService.logAction(AuditAction.LOGIN_SUCCESS, "User", user.getId(), fullName, null, null,
+                "Login successful", user.getEmail());
 
         return new AuthenticationResponseDto(
                 token,
@@ -79,15 +90,17 @@ public class AuthenticationService {
 
     // ✅ JWTs are stateless — this does NOT invalidate the token itself (the client
     // is responsible for discarding it). It exists purely to record a LOGOUT audit
-    // event for the currently authenticated user. If you need real server-side
-    // token invalidation, that requires a token blacklist/allowlist, which is a
-    // separate feature from auditing.
+    // event for the currently authenticated user. Unlike login, this endpoint
+    // requires a valid JWT, so SecurityContext already holds the real user here —
+    // no explicit actor override needed.
     public void logout() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<User> user = userRepository.findByEmail(email);
 
+        String fullName = user.map(u -> u.getFirstName() + " " + u.getLastName()).orElse(email);
+
         auditService.logAction(AuditAction.LOGOUT, "User",
-                user.map(User::getId).orElse(null), null, null,
+                user.map(User::getId).orElse(null), fullName, null, null,
                 "User logged out");
     }
 }

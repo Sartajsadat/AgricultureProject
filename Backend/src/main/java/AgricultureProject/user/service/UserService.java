@@ -49,6 +49,10 @@ public class UserService {
                 : "SYSTEM";
     }
 
+    private String fullName(User user) {
+        return user.getFirstName() + " " + user.getLastName();
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -104,7 +108,7 @@ public class UserService {
 
         User saved = userRepository.save(user);
 
-        auditService.logCreate("User", saved.getId(), UserResponseDto.from(saved),
+        auditService.logCreate("User", saved.getId(), fullName(saved), UserResponseDto.from(saved),
                 "User created by " + actor);
 
         return saved;
@@ -159,7 +163,7 @@ public class UserService {
         User saved = userRepository.save(existingUser);
 
         if (!changedFields.isEmpty()) {
-            auditService.logUpdate("User", id, oldSnapshot, UserResponseDto.from(saved),
+            auditService.logUpdate("User", id, fullName(saved), oldSnapshot, UserResponseDto.from(saved),
                     "Updated by " + actor + " — changed: " + String.join(", ", changedFields));
         }
 
@@ -173,10 +177,11 @@ public class UserService {
 
         UserResponseDto snapshot = UserResponseDto.from(user);
         String actor = getCurrentUserEmail();
+        String label = fullName(user);
 
         userRepository.delete(user);
 
-        auditService.logDelete("User", id, snapshot, "User deleted by " + actor);
+        auditService.logDelete("User", id, label, snapshot, "User deleted by " + actor);
     }
 
     @Transactional
@@ -193,7 +198,7 @@ public class UserService {
 
         User saved = userRepository.save(user);
 
-        auditService.logAction(AuditAction.STATUS_CHANGE, "User", id,
+        auditService.logAction(AuditAction.STATUS_CHANGE, "User", id, fullName(saved),
                 Map.of("status", oldStatus), Map.of("status", status),
                 "Status changed from " + oldStatus + " to " + status + " by " + actor);
 
@@ -217,7 +222,7 @@ public class UserService {
         User saved = userRepository.save(user);
 
         Set<String> newRoles = roles.stream().map(Role::getName).collect(Collectors.toSet());
-        auditService.logAction(AuditAction.ROLE_ASSIGNED, "User", userId, oldRoles, newRoles,
+        auditService.logAction(AuditAction.ROLE_ASSIGNED, "User", userId, fullName(saved), oldRoles, newRoles,
                 "Roles reassigned by " + actor);
 
         return saved;
@@ -239,7 +244,7 @@ public class UserService {
         User saved = userRepository.save(user);
 
         Set<String> newRoles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
-        auditService.logAction(AuditAction.ROLE_ASSIGNED, "User", userId, oldRoles, newRoles,
+        auditService.logAction(AuditAction.ROLE_ASSIGNED, "User", userId, fullName(saved), oldRoles, newRoles,
                 "Role '" + role.getName() + "' added by " + actor);
 
         return saved;
@@ -261,16 +266,13 @@ public class UserService {
         User saved = userRepository.save(user);
 
         Set<String> newRoles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
-        auditService.logAction(AuditAction.ROLE_REMOVED, "User", userId, oldRoles, newRoles,
+        auditService.logAction(AuditAction.ROLE_REMOVED, "User", userId, fullName(saved), oldRoles, newRoles,
                 "Role '" + role.getName() + "' removed by " + actor);
 
         return saved;
     }
 
     // ✅ Self-service: authenticated user changes THEIR OWN password.
-    // Resolves the target user from the SecurityContext — never from a
-    // client-supplied id — so nobody can change someone else's password
-    // through this endpoint.
     @Transactional
     public void changeOwnPassword(String oldPassword, String newPassword) {
         String email = getCurrentUserEmail();
@@ -283,7 +285,7 @@ public class UserService {
         validateNewPassword(newPassword);
 
         applyNewPassword(user, newPassword);
-        auditService.logAction(AuditAction.PASSWORD_CHANGED, "User", user.getId(), null, null,
+        auditService.logAction(AuditAction.PASSWORD_CHANGED, "User", user.getId(), fullName(user), null, null,
                 "Password changed by " + email);
     }
 
@@ -298,7 +300,7 @@ public class UserService {
         String actor = getCurrentUserEmail();
         applyNewPassword(user, newPassword);
 
-        auditService.logAction(AuditAction.PASSWORD_RESET, "User", userId, null, null,
+        auditService.logAction(AuditAction.PASSWORD_RESET, "User", userId, fullName(user), null, null,
                 "Password reset by " + actor);
     }
 

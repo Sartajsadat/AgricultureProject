@@ -34,36 +34,55 @@ public class AuditService {
     // ✅ REQUIRES_NEW: audit writes commit independently of whatever business
     // transaction triggered them — a rollback in the caller doesn't erase the
     // audit trail, and a read-only caller (like login) can still write here.
+    //
+    // entityLabel: a human-readable name for whatever entityId points to
+    // (e.g. "Ali Ahmad") — captured at the moment of the action, since the
+    // caller always has it in hand right then. This is what the UI shows
+    // instead of a bare "#42".
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void logCreate(String entityType, Long entityId, Object newValue, String description) {
-        persist(AuditAction.CREATE, entityType, entityId, null, newValue, description);
+    public void logCreate(String entityType, Long entityId, String entityLabel, Object newValue, String description) {
+        persist(AuditAction.CREATE, entityType, entityId, entityLabel, null, newValue, description, null);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void logUpdate(String entityType, Long entityId, Object oldValue, Object newValue, String description) {
-        persist(AuditAction.UPDATE, entityType, entityId, oldValue, newValue, description);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void logDelete(String entityType, Long entityId, Object oldValue, String description) {
-        persist(AuditAction.DELETE, entityType, entityId, oldValue, null, description);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void logAction(AuditAction action, String entityType, Long entityId,
+    public void logUpdate(String entityType, Long entityId, String entityLabel,
                           Object oldValue, Object newValue, String description) {
-        persist(action, entityType, entityId, oldValue, newValue, description);
+        persist(AuditAction.UPDATE, entityType, entityId, entityLabel, oldValue, newValue, description, null);
     }
 
-    private void persist(AuditAction action, String entityType, Long entityId,
-                         Object oldValue, Object newValue, String description) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logDelete(String entityType, Long entityId, String entityLabel, Object oldValue, String description) {
+        persist(AuditAction.DELETE, entityType, entityId, entityLabel, oldValue, null, description, null);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logAction(AuditAction action, String entityType, Long entityId, String entityLabel,
+                          Object oldValue, Object newValue, String description) {
+        persist(action, entityType, entityId, entityLabel, oldValue, newValue, description, null);
+    }
+
+    // ✅ Explicit-actor variant: for events where SecurityContext doesn't
+    // (yet) hold the real user — most notably login itself, where the
+    // request is still anonymous from Spring Security's point of view right
+    // up until authentication succeeds. Callers that already know exactly
+    // who this is about (AuthenticationService does) pass the email directly
+    // instead of relying on currentActor().
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logAction(AuditAction action, String entityType, Long entityId, String entityLabel,
+                          Object oldValue, Object newValue, String description, String actorOverride) {
+        persist(action, entityType, entityId, entityLabel, oldValue, newValue, description, actorOverride);
+    }
+
+    private void persist(AuditAction action, String entityType, Long entityId, String entityLabel,
+                         Object oldValue, Object newValue, String description, String actorOverride) {
         try {
             AuditLog entry = new AuditLog();
             entry.setEntityType(entityType);
             entry.setEntityId(entityId);
+            entry.setEntityLabel(entityLabel);
             entry.setAction(action);
-            entry.setPerformedBy(currentActor());
+            entry.setPerformedBy(actorOverride != null ? actorOverride : currentActor());
             entry.setPerformedAt(LocalDateTime.now());
             entry.setOldValue(toJson(oldValue));
             entry.setNewValue(toJson(newValue));
@@ -79,9 +98,14 @@ public class AuditService {
 
     private String currentActor() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (authentication != null && authentication.isAuthenticated())
-                ? authentication.getName()
-                : "SYSTEM";
+        // ✅ Spring Security's AnonymousAuthenticationFilter gives unauthenticated
+        // requests a real (but fake) principal named "anonymousUser" — without this
+        // check that string would get written to the audit log as if it were a person.
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+            return "SYSTEM";
+        }
+        return authentication.getName();
     }
 
     private String toJson(Object value) {

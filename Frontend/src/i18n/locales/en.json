@@ -7,7 +7,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "userManagement": "User Management",
-    "roles": "Roles"
+    "roles": "Roles",
+    "auditLogs": "Audit Logs"
   },
   "navbar": {
     "language": "Language",
@@ -50,6 +51,45 @@
     "name": "Role name",
     "empty": "No roles yet.",
     "createSuccess": "Role created successfully"
+  },
+  "audit": {
+    "title": "Audit Logs",
+    "search": "Search description, user, or entity...",
+    "filters": "Filters",
+    "applyFilters": "Apply",
+    "clearFilters": "Clear",
+    "action": "Action",
+    "allActions": "All actions",
+    "performedBy": "Performed by",
+    "empty": "No audit logs found.",
+    "viewDetails": "View details",
+    "columns": {
+      "action": "Action",
+      "entity": "Entity",
+      "performedBy": "Performed by",
+      "description": "Description",
+      "date": "Date"
+    },
+    "details": {
+      "title": "Audit Log Details",
+      "oldValue": "Before",
+      "newValue": "After",
+      "ip": "IP address",
+      "userAgent": "Device / browser"
+    },
+    "actions": {
+      "CREATE": "Created",
+      "UPDATE": "Updated",
+      "DELETE": "Deleted",
+      "STATUS_CHANGE": "Status Changed",
+      "ROLE_ASSIGNED": "Role Assigned",
+      "ROLE_REMOVED": "Role Removed",
+      "PASSWORD_CHANGED": "Password Changed",
+      "PASSWORD_RESET": "Password Reset",
+      "LOGIN_SUCCESS": "Login Success",
+      "LOGIN_FAILED": "Login Failed",
+      "LOGOUT": "Logout"
+    }
   },
   "profile": {
     "title": "My Profile",

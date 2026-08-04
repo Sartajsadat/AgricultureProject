@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, ScrollText } from 'lucide-react';
 
 // ✅ Each item declares which role(s) can see it. Sidebar.jsx just filters
 // this list against the current user's roles — it has no per-role branching
@@ -26,6 +26,13 @@ export const navItems = [
     labelKey: 'nav.roles',
     path: '/admin/roles',
     icon: ShieldCheck,
+    roles: ['ADMIN'],
+  },
+  {
+    key: 'auditLogs',
+    labelKey: 'nav.auditLogs',
+    path: '/admin/audit-logs',
+    icon: ScrollText,
     roles: ['ADMIN'],
   },
 ];

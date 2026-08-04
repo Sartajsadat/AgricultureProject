@@ -5,6 +5,7 @@ import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
 import UserManagementPage from '../pages/admin/UserManagementPage';
 import RolesPage from '../pages/admin/RolesPage';
+import AuditLogsPage from '../pages/admin/AuditLogsPage';
 import { useAuth } from '../context/AuthContext';
 
 export default function AppRoutes() {
@@ -41,6 +42,14 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute roles={['ADMIN']}>
               <RolesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/audit-logs"
+          element={
+            <ProtectedRoute roles={['ADMIN']}>
+              <AuditLogsPage />
             </ProtectedRoute>
           }
         />

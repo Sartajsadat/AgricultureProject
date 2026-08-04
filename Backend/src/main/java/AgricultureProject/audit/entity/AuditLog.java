@@ -21,6 +21,9 @@ public class AuditLog {
 
     private Long entityId; // nullable — e.g. LOGIN_FAILED for an email that doesn't exist
 
+    @Column(length = 200)
+    private String entityLabel; // human-readable name, e.g. "Ali Ahmad" — shown instead of a bare id in the UI
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private AuditAction action;

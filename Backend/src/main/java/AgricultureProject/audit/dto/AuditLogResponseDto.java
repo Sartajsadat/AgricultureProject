@@ -15,6 +15,7 @@ public class AuditLogResponseDto {
     private Long id;
     private String entityType;
     private Long entityId;
+    private String entityLabel;
     private AuditAction action;
     private String performedBy;
     private LocalDateTime performedAt;
@@ -29,6 +30,7 @@ public class AuditLogResponseDto {
                 log.getId(),
                 log.getEntityType(),
                 log.getEntityId(),
+                log.getEntityLabel(),
                 log.getAction(),
                 log.getPerformedBy(),
                 log.getPerformedAt(),

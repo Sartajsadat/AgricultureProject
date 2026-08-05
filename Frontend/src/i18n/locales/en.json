@@ -41,6 +41,8 @@
     "empty": "No users found.",
     "createSuccess": "User created successfully",
     "updateSuccess": "User updated successfully",
+    "fillFromRecent": "Fill from recent",
+    "clearRecent": "Clear history",
     "deleteTitle": "Delete user?",
     "deleteMessage": "This will permanently delete {{name}}. This cannot be undone.",
     "resetPasswordTitle": "Reset Password"

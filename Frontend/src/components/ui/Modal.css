@@ -151,3 +151,63 @@
   background: var(--color-primary-soft);
   color: var(--color-primary);
 }
+
+.add-user__recent {
+  align-self: flex-start;
+  margin-bottom: calc(var(--space-2) * -1);
+}
+
+.recent-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 240px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.recent-entries__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  text-align: start;
+}
+
+.recent-entries__item:hover {
+  background: var(--color-primary-soft);
+}
+
+.recent-entries__name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.recent-entries__email {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.recent-entries__clear {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  background: transparent;
+  border-inline: none;
+  border-bottom: none;
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
+
+.recent-entries__clear:hover {
+  text-decoration: underline;
+}

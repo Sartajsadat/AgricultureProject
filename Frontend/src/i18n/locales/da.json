@@ -41,6 +41,8 @@
     "empty": "کاربری یافت نشد.",
     "createSuccess": "کاربر با موفقیت ایجاد شد",
     "updateSuccess": "کاربر با موفقیت به‌روزرسانی شد",
+    "fillFromRecent": "پر کردن از موارد اخیر",
+    "clearRecent": "پاک کردن تاریخچه",
     "deleteTitle": "کاربر حذف شود؟",
     "deleteMessage": "این کار {{name}} را برای همیشه حذف می‌کند. این عمل قابل بازگشت نیست.",
     "resetPasswordTitle": "بازنشانی رمز عبور"

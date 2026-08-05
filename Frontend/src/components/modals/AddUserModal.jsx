@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { History, Trash2 } from 'lucide-react';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import Popover from '../ui/Popover';
 import { userApi } from '../../api/userApi';
 import { roleApi } from '../../api/roleApi';
 import { useToast } from '../../context/ToastContext';
+import { getFormHistory, saveFormHistory, clearFormHistory } from '../../utils/formHistory';
+
+const HISTORY_KEY = 'add-user';
+const DEFAULT_TEST_PASSWORD = '123456';
 
 const initialForm = {
   firstName: '',
@@ -26,10 +32,12 @@ export default function AddUserModal({ open, onClose, onCreated }) {
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recentEntries, setRecentEntries] = useState([]);
 
   useEffect(() => {
     if (open) {
       roleApi.list().then(setAvailableRoles).catch(() => setAvailableRoles([]));
+      setRecentEntries(getFormHistory(HISTORY_KEY));
     }
   }, [open]);
 
@@ -41,6 +49,30 @@ export default function AddUserModal({ open, onClose, onCreated }) {
     setSelectedRoles((prev) =>
       prev.includes(roleName) ? prev.filter((r) => r !== roleName) : [...prev, roleName]
     );
+  }
+
+  // ✅ Fills every field from a previous entry in one click. Password is
+  // never stored in history — it's set to the project's standard test
+  // password instead, and is still fully editable before submitting.
+  function fillFromRecent(entry, close) {
+    setForm({
+      firstName: entry.firstName || '',
+      lastName: entry.lastName || '',
+      email: entry.email || '',
+      password: DEFAULT_TEST_PASSWORD,
+      directorate: entry.directorate || '',
+      department: entry.department || '',
+      position: entry.position || '',
+      phoneNo: entry.phoneNo || '',
+    });
+    setSelectedRoles(entry.roles || []);
+    close?.();
+  }
+
+  function handleClearHistory(close) {
+    clearFormHistory(HISTORY_KEY);
+    setRecentEntries([]);
+    close?.();
   }
 
   function handleClose() {
@@ -63,6 +95,17 @@ export default function AddUserModal({ open, onClose, onCreated }) {
     try {
       const created = await userApi.create({ ...form, roles: selectedRoles });
       onCreated?.(created);
+      // Save everything except the password for next time.
+      saveFormHistory(HISTORY_KEY, {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        directorate: form.directorate,
+        department: form.department,
+        position: form.position,
+        phoneNo: form.phoneNo,
+        roles: selectedRoles,
+      });
       toast.success(t('users.createSuccess'));
       handleClose();
     } catch (err) {
@@ -75,6 +118,44 @@ export default function AddUserModal({ open, onClose, onCreated }) {
   return (
     <Modal open={open} onClose={handleClose} title={t('users.addNew')} size="lg">
       <form className="modal-form" onSubmit={handleSubmit}>
+        {recentEntries.length > 0 && (
+          <div className="add-user__recent">
+            <Popover
+              align="start"
+              trigger={
+                <Button type="button" variant="ghost" size="sm" icon={History}>
+                  {t('users.fillFromRecent')}
+                </Button>
+              }
+            >
+              {({ close }) => (
+                <div className="recent-entries">
+                  {recentEntries.map((entry, i) => (
+                    <button
+                      type="button"
+                      key={`${entry.email}-${i}`}
+                      className="recent-entries__item"
+                      onClick={() => fillFromRecent(entry, close)}
+                    >
+                      <span className="recent-entries__name">
+                        {entry.firstName} {entry.lastName}
+                      </span>
+                      <span className="recent-entries__email">{entry.email}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="recent-entries__clear"
+                    onClick={() => handleClearHistory(close)}
+                  >
+                    <Trash2 size={13} /> {t('users.clearRecent')}
+                  </button>
+                </div>
+              )}
+            </Popover>
+          </div>
+        )}
+
         <div className="modal-form__grid">
           <Input label={t('profile.firstName')} value={form.firstName} onChange={(e) => update('firstName', e.target.value)} required />
           <Input label={t('profile.lastName')} value={form.lastName} onChange={(e) => update('lastName', e.target.value)} required />

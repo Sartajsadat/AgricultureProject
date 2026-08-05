@@ -87,7 +87,7 @@ export default function EditUserModal({ open, onClose, user, onSaved }) {
   if (!user) return null;
 
   return (
-    <Modal open={open} onClose={onClose} title={t('users.edit')}>
+    <Modal open={open} onClose={onClose} title={t('users.edit')} size="lg">
       <form className="modal-form" onSubmit={handleSubmit}>
         <div className="modal-form__grid">
           <Input label={t('profile.firstName')} value={form.firstName} onChange={(e) => update('firstName', e.target.value)} required />

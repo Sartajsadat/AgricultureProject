@@ -3,6 +3,9 @@
   flex-direction: column;
   gap: var(--space-1);
   width: 100%;
+  min-width: 0; /* ✅ lets this shrink inside a grid/flex column instead of
+                    forcing the track to stay as wide as the input's default
+                    intrinsic size — this is what was causing the overflow */
 }
 
 .field__label {

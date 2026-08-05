@@ -115,7 +115,7 @@ export default function UserManagementPage() {
         <div className="user-management__actions">
           <IconButton icon={Pencil} label={t('common.edit')} onClick={() => setEditingUser(row)} />
           <IconButton icon={KeyRound} label={t('users.resetPasswordTitle')} onClick={() => setResettingUser(row)} />
-          <IconButton icon={Trash2} label={t('common.delete')} tone="danger" onClick={() => setDeletingUser(row)} />
+          {/*<IconButton icon={Trash2} label={t('common.delete')} tone="danger" onClick={() => setDeletingUser(row)} />*/}
         </div>
       ),
     },

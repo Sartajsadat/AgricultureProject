@@ -73,7 +73,7 @@ export default function AddUserModal({ open, onClose, onCreated }) {
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title={t('users.addNew')}>
+    <Modal open={open} onClose={handleClose} title={t('users.addNew')} size="lg">
       <form className="modal-form" onSubmit={handleSubmit}>
         <div className="modal-form__grid">
           <Input label={t('profile.firstName')} value={form.firstName} onChange={(e) => update('firstName', e.target.value)} required />

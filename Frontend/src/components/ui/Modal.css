@@ -18,7 +18,12 @@
   max-width: 440px;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden; /* ✅ modals should reflow/shrink their content, never scroll sideways */
   animation: modal-pop 180ms ease;
+}
+
+.modal--lg {
+  max-width: 560px;
 }
 
 .modal__header {
